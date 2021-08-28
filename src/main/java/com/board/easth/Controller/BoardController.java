@@ -19,7 +19,6 @@ import java.util.List;
 @Controller
 @RequestMapping("/board")
 public class BoardController {
-
     @Autowired
     private BoardRepository boardRepository;
 
@@ -27,11 +26,14 @@ public class BoardController {
     private BoardValidator  boardValidator;
 
     @GetMapping("/list")
-    public String list(Model model, @PageableDefault(size = 1) Pageable pageable) {
-        Page<Board> boards = boardRepository.findAll(pageable);
+    public String list(Model model, @PageableDefault(size = 1) Pageable pageable, @RequestParam(required = false, defaultValue = "") String searchText) {
+//        Page<Board> boards = boardRepository.findAll(pageable);
+        Page<Board> boards = boardRepository.findByTitleContainingOrContentContaining(searchText, searchText, pageable);
         int currentPage = boards.getPageable().getPageNumber();
         int startPage = (currentPage - (currentPage % 5)) + 1;
         int endPage = Math.min(boards.getTotalPages(),startPage + 4);
+        if(endPage < 1)
+            endPage = 1;
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
         model.addAttribute("boards", boards);
