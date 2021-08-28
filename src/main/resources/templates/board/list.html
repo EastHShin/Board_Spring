@@ -18,7 +18,7 @@
 <main class="container">
   <div class="bg-light p-5 rounded">
     <h1>Board</h1>
-    <div>총 건수: <span th:text="${#lists.size(boards)}"></span></div>
+    <div>총 건수: <span th:text="${boards.totalElements}"></span></div>
     <table class="table table-striped">
       <thead>
         <tr>
@@ -37,14 +37,12 @@
     </table>
     <nav aria-label="Page navigation example">
       <ul class="pagination justify-content-center">
-        <li class="page-item disabled">
-          <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+        <li class="page-item" th:classappend="${0 == boards.pageable.pageNumber} ? 'disabled' : ''">
+          <a class="page-link" href="#" tabindex="-1" aria-disabled="true" th:href="@{/board/list(page=${boards.pageable.pageNumber - 1})}">Previous</a>
         </li>
-        <li class="page-item"><a class="page-link" href="#">1</a></li>
-        <li class="page-item"><a class="page-link" href="#">2</a></li>
-        <li class="page-item"><a class="page-link" href="#">3</a></li>
-        <li class="page-item">
-          <a class="page-link" href="#">Next</a>
+        <li class="page-item" th:classappend="${i == boards.pageable.pageNumber+1} ? 'disabled' : ''" th:each="i: ${#numbers.sequence(startPage, endPage)}"><a class="page-link" href="#" th:text="${i}" th:href="@{/board/list(page=${i - 1})}">1</a></li>
+        <li class="page-item" th:classappend="${boards.totalPages == boards.pageable.pageNumber + 1}">
+          <a class="page-link" href="#" th:href="@{/board/list(page=${boards.pageable.pageNumber + 1})}">Next</a>
         </li>
       </ul>
     </nav>
