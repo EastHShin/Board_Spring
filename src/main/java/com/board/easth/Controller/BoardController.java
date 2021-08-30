@@ -2,12 +2,14 @@ package com.board.easth.Controller;
 
 import com.board.easth.model.Board;
 import com.board.easth.model.repository.BoardRepository;
+import com.board.easth.service.BoardService;
 import com.board.easth.validator.BoardValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,8 +27,11 @@ public class BoardController {
     @Autowired
     private BoardValidator  boardValidator;
 
+    @Autowired
+    private BoardService boardService;
+
     @GetMapping("/list")
-    public String list(Model model, @PageableDefault(size = 1) Pageable pageable, @RequestParam(required = false, defaultValue = "") String searchText) {
+    public String list(Model model, @PageableDefault(size = 5) Pageable pageable, @RequestParam(required = false, defaultValue = "") String searchText) {
 //        Page<Board> boards = boardRepository.findAll(pageable);
         Page<Board> boards = boardRepository.findByTitleContainingOrContentContaining(searchText, searchText, pageable);
         int currentPage = boards.getPageable().getPageNumber();
@@ -53,12 +58,14 @@ public class BoardController {
     }
 
     @PostMapping("/form")
-    public String formSubmit(@ModelAttribute("boards") @Valid Board board, BindingResult bindingResult) {
+    public String formSubmit(@ModelAttribute("boards") @Valid Board board, BindingResult bindingResult, Authentication authentication) {
         boardValidator.validate(board, bindingResult);
         if (bindingResult.hasErrors()) {
             return "board/form";
         }
-        boardRepository.save(board);
+        String username = authentication.getName();
+        boardService.save(username, board);
+//        boardRepository.save(board);
         return "redirect:/board/list";
     }
 }
